@@ -1,3 +1,9 @@
+#if os(Linux)
+    import Glibc
+#else
+    import Foundation
+#endif
+
 import Taylor
 
 let server = Taylor.Server()
@@ -18,7 +24,15 @@ server.post("/", Middleware.bodyParser(), {
     return .Send
 })
 
-let port = 3002
+func getPort(default defaultPort: Int) -> Int {
+  guard let portString = String.fromCString(getenv("PORT")),
+            portNumber = Int(portString) else { return defaultPort }
+
+  return portNumber
+}
+
+var port = getPort(default: 3002)
+
 do {
     print("Staring server on port: \(port)")
     try server.serveHTTP(port: port, forever: true)
